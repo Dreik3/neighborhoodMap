@@ -66,8 +66,9 @@ var ViewModel = function() {
         };
     };
     self.filterPlaces = function(searchStr) {
+        newPlaces = [];
         for (var i = 0; i < places.length; i++) {
-            if (self.searchStr() === places[i].title) {
+            if (places[i].title.toLowerCase().indexOf(self.searchStr().toLowerCase()) + 1) {
                 var count = 0;
                 for (var j = 0; j < newPlaces.length; j++) {
                     if (places[i] === newPlaces[j]) {
@@ -76,6 +77,7 @@ var ViewModel = function() {
                 };
                 if (count === 0) {
                     newPlaces.push(places[i]);
+                    console.log(newPlaces);
                 };
             };
         };
@@ -98,6 +100,7 @@ function showMarkers() {
                 title: title,
                 id: i
             });
+        $(`#${marker.id}`).parent().attr("style", "");
         markers.push(marker);
         largeInfoWindow = new google.maps.InfoWindow();
         marker.addListener('click', function(){
@@ -128,8 +131,8 @@ function replaceMarkers(places) {
 
     markers.forEach(function(marker) {
         if (!placesMap.has(marker.id)) {
-            // tried to hide list elements on places which wasn't chosen - don't work
-            $(`#${marker.id}`).parent().attr("display", "none");
+            // hide list elements which wasn't chosen
+            $(`#${marker.id}`).parent().attr("style", "display:none");
             //hide markers which wasn't chosen
             marker.setVisible(false);
         } else {
