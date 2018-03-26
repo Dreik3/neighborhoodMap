@@ -48,3 +48,17 @@ h2 {
     margin-right: 3px;
     margin-left: 3px;
 }
+.closed {
+    display: none;
+}
+.wikiList {
+    padding-left: 25px;
+    font-size: 0.7em;
+    color: black;
+}
+.placeList {
+    color: black;
+}
+p {
+    margin-bottom: 0;
+}

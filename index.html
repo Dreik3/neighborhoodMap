@@ -4,22 +4,25 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Neighborhood Map</title>
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+
 </head>
 <body>
     <div class="container1">
         <div class="options-box">
-            <h2>Dreik's locations</h1>
+            <div>
+                <h2>PTZ locations</h2>
+            </div>
             <form class="form-inline">
-                <input class="form-control" type="text" data-bind="textInput: searchStr">
+                <input class="form-control" type="text" data-bind="textInput: searchStr" onfocus="if (this.value == 'Find your place') {this.value = '';}" onblur="if (this.value == '') {this.value = 'Find your place';}">
                 <input class="btn btn-primary" type="submit" value="Search" data-bind="click: filterPlaces">
-                <input class="btn btn-warning" type="submit" value="Reset" data-bind="click: showMarkers"
+                <input class="btn btn-warning" type="submit" value="Reset" data-bind="click: showMarkers">
             </form>
             <ul id="list-view" class="list-group" data-bind="foreach: locations">
-                <li data-bind="click: $parent.showInfo" class="list-group-item">
-                    <a href="#" data-bind="text: title"></a>
-                    <div class="description-row" data-bind="attr:{id:id}, visible: $parent.shouldShowRow"></div>
+                <li class="list-group-item">
+                    <a class="placeList" href="#" data-bind="text: title, click: $parent.showInfo"></a>
+                    <ul class="wikiList" data-bind="attr:{id:id}, visible: $parent.shouldShowRow"></ul>
                 </li>
             </div>
         </div>
@@ -30,7 +33,7 @@
     <script src="js/libs/jquery.min.js"></script>
     <script src="js/libs/bootstrap.min.js"></script>
     <script src="js/app.js"></script>
-    <!--позволяет браузеру продолжмит выполнение преобразования оставшейся части страницы во время загрузки api-->
+    <!-- асинхронный запрос позволяет браузеру продолжить выполнение преобразования оставшейся части страницы во время загрузки api-->
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?libraries=places,geometry,drawing&key=AIzaSyB8UxOCKBBZqm6QSiSTAl7LFE-hpARTvmI&v=3&callback=initMap">
     </script>

@@ -30,6 +30,7 @@ var locations = [{
     }];
 var searchStr = "Find your place";
 
+
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
         center: {lat: 61.799855, lng: 34.358208},
@@ -37,32 +38,34 @@ function initMap() {
         });
     showMarkers();
     showListings();
-
-
     }
-
-
 
 var ViewModel = function() {
     var self = this;
-    /*var places = ko.observable(locations);*/
-
-    var shouldShowRow = ko.observable(false);
-    self.searchStr = ko.observable(searchStr);
     var places = locations;
+    self.shouldShowRow = ko.observableArray();
+    self.alreadyHaveInfo = ko.observableArray();
+    for (var i = 0; i < places.length; i++) {
+        self.shouldShowRow().push(false);
+        self.alreadyHaveInfo().push(false);
+    };
+    self.searchStr = ko.observable(searchStr);
     var newPlaces = [];
     self.showInfo = function(place) {
-        if (!shouldShowRow()) {
+        if (!self.shouldShowRow()[place.id]) {
             centerToMarker(place);
             var curMarker = markers[place.id];
             populateInfoWindow(curMarker, largeInfoWindow);
-            if(place.info === false) {
+            if (!self.alreadyHaveInfo()[place.id]) {
                 getPlaceInfo(place);
-                place.info = true;
+                self.alreadyHaveInfo()[place.id] = true;
             };
-            shouldShowRow(true);
+            showPlaceInfo(place);
+            self.shouldShowRow()[place.id] = true;
         } else {
-            shouldShowRow(false);
+            self.shouldShowRow()[place.id] = false;
+            closeInfoWindow(largeInfoWindow);
+            hidePlaceInfo(place);
         };
     };
     self.filterPlaces = function(searchStr) {
@@ -84,7 +87,6 @@ var ViewModel = function() {
         //refresh markers on map
         replaceMarkers(newPlaces);
         closeInfoWindow(largeInfoWindow);
-        /*saveSearchStr(self.searchStr());*/
     };
 };
 
@@ -108,20 +110,7 @@ function showMarkers() {
         });
     }
 }
-/*function createMarker(place) {
-    var marker = new google.maps.Marker({
-        position: { lat: place.lat, lng: place.lng },
-        map: map,
-        title: "huinya",
-        animation: google.maps.Animation.DROP
-    });
-    marker.placeId = place.id;
-    marker.addListener('click', function() {
-        getPlaceInfo(place);
-    });
 
-    return marker;
-}*/
 function replaceMarkers(places) {
     var placesMap = new Map();
 
@@ -142,11 +131,6 @@ function replaceMarkers(places) {
             placesMap.delete(marker.placeId);
         }
     });
-
-    //creating new markers
-/*    placesMap.forEach(function(place) {
-        markers.push(createMarker(place));
-    });*/
 }
 function populateInfoWindow(marker, infowindow) {
     if (infowindow.marker != marker) {
@@ -195,10 +179,38 @@ function showListings() {
 
 //will be changed for wiki api request (ahhaha will be changed for some information about this place from wikipedia)
 function getPlaceInfo(place) {
-    $(`#${place.id}`).append(`<div> ahahahhahaha </div>`);
+    var articleStr = "";
+    var wikiUrl = "https://en.wikipedia.org/w/api.php?action=opensearch&search="
+                  + place.title + '&format=json&callback=wikiCallback';
+    //set timeout for wikipedia ajax request
+    var wikiRequestTimeout = setTimeout(function(){
+            $wikiElem.text("failed to get wikipedia resources");
+        }, 8000);
+    $.ajax({
+        url: wikiUrl,
+        dataType: "jsonp",
+        success: function(response){
+            var articleList = response[1];
+            if (articleList.length > 0) {
+                for (var i = 0; i < articleList.length; i++){
+                    articleStr = articleList[i];
+                    var url = "https://en.wikipedia.org/wiki/" + articleStr;
+                    $(`#${place.id}`).append(`<li> <a href="${url}" target="_blank">${articleStr}</a></li>`);
+                };
+            } else {
+                $(`#${place.id}`).append(`<p>Sorry, wikipedia articles about this place wasn't found!</p>`);
+            }
+
+            // stop timeout, so $wikiElem won't change to "fail to get wiki request"
+            clearTimeout(wikiRequestTimeout);
+        }
+    });
+}
+function showPlaceInfo(place) {
+    $(`#${place.id}`).attr("style","");
 }
 function hidePlaceInfo(place) {
-
+    $(`#${place.id}`).attr("style", "display: none");
 }
 function centerToMarker(place) {
     var marker = markers.find(function(marker) {
