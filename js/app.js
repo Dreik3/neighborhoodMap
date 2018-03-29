@@ -71,11 +71,12 @@ var ViewModel = function() {
     self.filterPlaces = function(searchStr) {
         newPlaces = [];
         for (var i = 0; i < places.length; i++) {
+            //indexOf returns -1 if searchStr didnt match title
             if (places[i].title.toLowerCase().indexOf(self.searchStr().toLowerCase()) + 1) {
                 var count = 0;
                 for (var j = 0; j < newPlaces.length; j++) {
                     if (places[i] === newPlaces[j]) {
-                        count += count;
+                        count += 1;
                     };
                 };
                 if (count === 0) {
@@ -127,8 +128,6 @@ function replaceMarkers(places) {
         } else {
             //show marker which we created earlier
             marker.setVisible(true);
-            //delete marker from map,so we don't need to create them again
-            placesMap.delete(marker.placeId);
         }
     });
 }
@@ -214,7 +213,7 @@ function hidePlaceInfo(place) {
 }
 function centerToMarker(place) {
     var marker = markers.find(function(marker) {
-        return marker.placeId === place.id;
+
     });
     if (marker !== undefined) {
         map.panTo({ lat: marker.getPosition().lat(), lng: marker.getPosition().lng() });
